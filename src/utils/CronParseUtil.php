@@ -1,5 +1,5 @@
 <?php
-namespace CinCron\utils;
+namespace cin\cron\utils;
 
 
 use Exception;

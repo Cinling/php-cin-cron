@@ -1,13 +1,13 @@
 <?php
-namespace CinCron\vo;
+namespace cin\cron\vo;
 
 
-use CinCron\Cin;
-use CinCron\exceptions\CinCornException;
+use cin\cron\Cin;
+use cin\cron\exceptions\CinCornException;
 
 /**
  * Class Config 配置类
- * @package CinCron
+ * @package cin\cron
  */
 class ConfigVo {
     /**

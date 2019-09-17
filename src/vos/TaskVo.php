@@ -1,14 +1,14 @@
 <?php
-namespace CinCron\vo;
+namespace cin\cron\vo;
 
 
-use CinCron\utils\CronParseUtil;
+use cin\cron\utils\CronParseUtil;
 use Exception;
 
 /**
  * Class Task 单个任务的数据封装
  * @author Cinling
- * @package CinCron\vo
+ * @package cin\cron\vo
  */
 class TaskVo extends BaseVo {
     /**

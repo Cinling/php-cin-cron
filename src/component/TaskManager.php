@@ -1,17 +1,17 @@
 <?php
-namespace CinCron\component;
+namespace cin\cron\component;
 
-use CinCron\Cin;
-use CinCron\utils\ConsoleUtil;
-use CinCron\utils\JsonUtil;
-use CinCron\vo\ConfigVo;
-use CinCron\vo\TaskVo;
+use cin\cron\Cin;
+use cin\cron\utils\ConsoleUtil;
+use cin\cron\utils\JsonUtil;
+use cin\cron\vo\ConfigVo;
+use cin\cron\vo\TaskVo;
 use Exception;
 
 /**
  * Class Manager
  * 任务管理器
- * @package CinCron
+ * @package cin\cron
  */
 class TaskManager {
     /**

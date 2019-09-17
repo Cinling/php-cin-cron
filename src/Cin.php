@@ -1,17 +1,17 @@
 <?php
 
 
-namespace CinCron;
+namespace cin\cron;
 
-use CinCron\component\TaskManager;
-use CinCron\vo\ConfigVo;
-use CinCron\exceptions\CinCornException;
+use cin\cron\component\TaskManager;
+use cin\cron\vo\ConfigVo;
+use cin\cron\exceptions\CinCornException;
 
 defined('STDOUT') or define('STDOUT', fopen('php://stdout', 'w'));
 
 /**
  * Class Cin cin-cron 全局静态类、入口类
- * @package CinCron
+ * @package cin\cron
  */
 class Cin {
     /**

@@ -1,7 +1,7 @@
 <?php
-namespace CinCron\utils;
+namespace cin\cron\utils;
 
-use CinCron\vo\BaseVo;
+use cin\cron\vo\BaseVo;
 
 /**
  * Class JsonUtil json工具

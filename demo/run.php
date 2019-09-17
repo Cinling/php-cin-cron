@@ -1,10 +1,11 @@
 <?php
 require "./../vendor/autoload.php";
 
-use CinCron\Cin;
-use CinCron\exceptions\CinCornException;
-use CinCron\utils\ConsoleUtil;
-use CinCron\vo\ConfigVo;
+use cin\cron\Cin;
+use cin\cron\exceptions\CinCornException;
+use cin\cron\utils\ConsoleUtil;
+use cin\cron\vo\ConfigVo;
+
 
 
 try {

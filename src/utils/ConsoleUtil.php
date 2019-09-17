@@ -1,12 +1,12 @@
 <?php
 
 
-namespace CinCron\utils;
+namespace cin\cron\utils;
 
 
 /**
  * Class ConsoleUtil 命令行工具
- * @package CinCron\utils
+ * @package cin\cron\utils
  */
 class ConsoleUtil {
     /**

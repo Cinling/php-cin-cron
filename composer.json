@@ -7,14 +7,15 @@
             "email": "1105412681@qq.com"
         }
     ],
-    "version": "0.0.2",
+    "version": "0.0.0",
     "require": {
         "php": ">=5.4"
     },
     "autoload": {
-        "psr-4": {"CinCron\\": "src/"},
+        "psr-4": {"cin\\cron\\": "src/"},
         "classmap": [
             "src/"
         ]
-    }
+    },
+    "prefer-stable": true
 }

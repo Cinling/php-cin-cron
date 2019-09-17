@@ -1,12 +1,12 @@
 <?php
-namespace CinCron\vo;
+namespace cin\cron\vo;
 
-use CinCron\utils\JsonUtil;
+use cin\cron\utils\JsonUtil;
 use ReflectionObject;
 
 /**
  * Class BaseVo 所有vo（ValueObject）的基类
- * @package CinCron\vo
+ * @package cin\cron\vo
  */
 class BaseVo {
     /**
