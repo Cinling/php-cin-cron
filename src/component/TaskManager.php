@@ -49,7 +49,6 @@ class TaskManager {
             $taskVo->active = Cin::TASK_ACTIVE_FALSE;
         }
         $this->saveTaskVoDict($oldTaskVoDict);
-        ConsoleUtil::output("close all tasks");
 
         // 重新写入的任务数据
         foreach ($this->taskVoDict as $taskId => $taskVo) {
@@ -161,7 +160,6 @@ class TaskManager {
             ) {
                 continue;
             }
-            ConsoleUtil::output(date("Y-m-d H:i:s", $taskVo->nextRunTime));
             $runTaskVoDict[$taskVo->id] = $taskVo;
         }
         return $runTaskVoDict;

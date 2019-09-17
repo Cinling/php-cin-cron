@@ -12,6 +12,9 @@
         "php": ">=5.4"
     },
     "autoload": {
-        "psr-4": {"CinCron\\": "src/"}
+        "psr-4": {"CinCron\\": "src/"},
+        "classmap": [
+            "src/"
+        ]
     }
 }

@@ -6,6 +6,7 @@ use CinCron\exceptions\CinCornException;
 use CinCron\utils\ConsoleUtil;
 use CinCron\vo\ConfigVo;
 
+
 try {
     init();
     run();
@@ -29,6 +30,7 @@ function getConfig() {
 /**
  * 初始化
  * @throws CinCornException
+ * @throws Exception
  */
 function init() {
     $taskManager = Cin::getTaskManager(getConfig());
