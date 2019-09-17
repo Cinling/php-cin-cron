@@ -1,6 +1,10 @@
 <?php
 namespace CinCron\vo;
 
+
+use CinCron\utils\CronParseUtil;
+use Exception;
+
 /**
  * Class Task 单个任务的数据封装
  * @author Cinling
@@ -34,7 +38,7 @@ class TaskVo extends BaseVo {
     /**
      * @var int 下一次运行时间（时间戳）
      */
-    public $nexRunTime;
+    public $nextRunTime;
     /**
      * @var bool 是否激活
      */
@@ -47,4 +51,24 @@ class TaskVo extends BaseVo {
      * @var int 任务创建时间（时间戳）
      */
     public $createTime;
+
+    /**
+     * 初始化数据
+     */
+    public function init() {
+        parent::init();
+        $this->lastRunTime = 0;
+        $this->createTime = time();
+    }
+
+    /**
+     * 获取下一次运行时间
+     * @return string 时间
+     * @throws Exception
+     */
+    public function getNextRunTime()
+    {
+        $array = CronParseUtil::formatToDate($this->cronTime);
+        return strtotime($array[0]);
+    }
 }

@@ -3,12 +3,16 @@ require "./../vendor/autoload.php";
 
 use CinCron\Cin;
 use CinCron\exceptions\CinCornException;
+use CinCron\utils\ConsoleUtil;
 use CinCron\vo\ConfigVo;
 
 try {
     init();
+    run();
 } catch (CinCornException $e) {
-    echo "异常";
+    ConsoleUtil::output($e->getMessage());
+} catch (Exception $e) {
+    ConsoleUtil::output($e->getMessage());
 }
 
 
@@ -17,7 +21,8 @@ try {
  */
 function getConfig() {
     $configVo = new ConfigVo();
-    $configVo->addTask(1, "测试1", "* * * * *", "php 1");
+    $configVo->addTask(1, "测试1", "* * * * *", "php task_1.php");
+    $configVo->addTask(2, "测试2", "* * * * *", "php task_2.php");
     return $configVo;
 }
 
@@ -29,16 +34,17 @@ function init() {
     $taskManager = Cin::getTaskManager(getConfig());
     $taskManager->init();
 
-    echo "init finished";
+    ConsoleUtil::output("init finished");
 }
 
 /**
  * 运行
  * @throws CinCornException
+ * @throws Exception
  */
 function run() {
     $taskManager = Cin::getTaskManager();
-    $taskManager->init();
+    $taskManager->run();
 
-    echo "run finished";
+    ConsoleUtil::output("run finished");
 }

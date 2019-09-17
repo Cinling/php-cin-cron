@@ -2,6 +2,7 @@
 namespace CinCron\vo;
 
 
+use CinCron\Cin;
 use CinCron\exceptions\CinCornException;
 
 /**
@@ -42,6 +43,8 @@ class ConfigVo {
         $taskVo->name = $name;
         $taskVo->cronTime = $cronTime;
         $taskVo->command = $command;
+        $taskVo->active = Cin::TASK_ACTIVE_TRUE;
+        $taskVo->status = Cin::TASK_STATUS_WAIT;
         $this->taskVoList[] = $taskVo;
     }
 }

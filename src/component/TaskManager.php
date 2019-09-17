@@ -6,6 +6,7 @@ use CinCron\utils\ConsoleUtil;
 use CinCron\utils\JsonUtil;
 use CinCron\vo\ConfigVo;
 use CinCron\vo\TaskVo;
+use Exception;
 
 /**
  * Class Manager
@@ -39,10 +40,9 @@ class TaskManager {
 
     /**
      * 初始化需要运行的任务
+     * @throws Exception
      */
     public function init() {
-        $filename = $this->getTaskListFilename();
-
         // 暂停所有定时任务
         $oldTaskVoDict = $this->readTaskVoDict();
         foreach ($oldTaskVoDict as $taskVo) {
@@ -52,26 +52,78 @@ class TaskManager {
         ConsoleUtil::output("close all tasks");
 
         // 重新写入的任务数据
-        $taskVoDict = $oldTaskVoDict;
-
-
-        $this->saveTaskVoDict($taskVoDict);
+        foreach ($this->taskVoDict as $taskId => $taskVo) {
+            if (isset($oldTaskVoDict[$taskId])) {
+                $tmpTaskVo = $oldTaskVoDict[$taskId];
+                $tmpTaskVo->name = $taskVo->name;
+                $tmpTaskVo->cronTime = $taskVo->cronTime;
+                $tmpTaskVo->command = $taskVo->command;
+                $nextRunTime = $tmpTaskVo->getNextRunTime();
+                if ($nextRunTime < $tmpTaskVo->nextRunTime) {
+                    $tmpTaskVo->nextRunTime = $nextRunTime;
+                }
+                $tmpTaskVo->active = Cin::TASK_ACTIVE_TRUE;
+                $oldTaskVoDict[$taskId] = $tmpTaskVo;
+            } else {
+                $oldTaskVoDict[$taskId] = $taskVo;
+            }
+        }
+        $this->saveTaskVoDict($oldTaskVoDict);
     }
 
+    /**
+     * 运行任务（一般是定时任务，每分钟运行一次）
+     * @throws Exception
+     */
     public function run() {
+        $now = time();
+        $runTaskVoDict = $this->getRunTaskVoDict();
 
-    }
+        foreach ($runTaskVoDict as $taskVo) {
+           $taskVo->status = Cin::TASK_STATUS_RUN;
+        }
+        $this->saveTaskVoDict($runTaskVoDict, false);
 
-    public function runByTask(TaskVo $taskVo) {
+        $procTaskIdDict = []; // 进程池
+        foreach ($runTaskVoDict as $taskId => $taskVo) {
+            $procTaskIdDict[$taskId] = proc_open($taskVo->command, [], $pipe);
+        }
 
+        while (count($procTaskIdDict)) {
+            foreach ($procTaskIdDict as $taskId => $result) {
+                $status = proc_get_status($result);
+                if ($status['running'] == FALSE) {
+                    proc_close($result);
+                    unset($procTaskIdDict[$taskId]);
+
+                    $taskVo = $runTaskVoDict[$taskId];
+                    $taskVo->status = Cin::TASK_STATUS_WAIT;
+                    $taskVo->lastRunTime = $now;
+                    $taskVo->nextRunTime = $taskVo->getNextRunTime();
+                    $taskVo->changeTime = time();
+                    $this->saveTaskVoDict([$taskId => $taskVo], false);
+                }
+            }
+
+            usleep(100);
+        }
     }
 
     /**
      * 保存当前的任务列表
-     * @param $taskVoDict
+     * @param TaskVo[] $taskVoDict
+     * @param bool $overwrite 是否覆盖。如果不覆盖则值替换其中部分数据
      */
-    private function saveTaskVoDict($taskVoDict) {
-        $content = JsonUtil::encode(array_values($taskVoDict));
+    private function saveTaskVoDict($taskVoDict, $overwrite = true) {
+        if (!$overwrite) {
+            $fileTaskVoDict = $this->readTaskVoDict();
+            foreach ($taskVoDict as $taskVo) {
+                $fileTaskVoDict[$taskVo->id] = $taskVo;
+            }
+            $content = JsonUtil::encode(array_values($fileTaskVoDict));
+        } else {
+            $content = JsonUtil::encode(array_values($taskVoDict));
+        }
         file_put_contents($this->getTaskListFilename(), $content);
     }
 
@@ -91,6 +143,28 @@ class TaskManager {
             $taskVoDict[$taskVo->id] = $taskVo;
         }
         return $taskVoDict;
+    }
+
+    /**
+     * 获取可以运行的任务字典
+     * @return TaskVo[]
+     */
+    private function getRunTaskVoDict() {
+        $taskVoDict = $this->readTaskVoDict();
+        $runTaskVoDict = [];
+        $now = time();
+        foreach ($taskVoDict as $taskVo) {
+            if (
+                $taskVo->status === Cin::TASK_STATUS_RUN
+                || $taskVo->active === Cin::TASK_ACTIVE_FALSE
+                || $taskVo->nextRunTime > $now
+            ) {
+                continue;
+            }
+            ConsoleUtil::output(date("Y-m-d H:i:s", $taskVo->nextRunTime));
+            $runTaskVoDict[$taskVo->id] = $taskVo;
+        }
+        return $runTaskVoDict;
     }
 
     /**
