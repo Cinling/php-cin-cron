@@ -2,11 +2,12 @@
 namespace cin\cron\utils;
 
 
+use cin\cron\exceptions\CinCornException;
 use Exception;
 
 /**
- * Class CronParser cron time 解析工具
- * @see https://gitee.com/jianglibin/codes/nfo3y04l6p1q9tu7xdske90 源码地址。本文件对一些命名不规范的地方做了一些修改
+ * Class CronParser cron time parse utils
+ * @copyright  https://gitee.com/jianglibin/codes/nfo3y04l6p1q9tu7xdske90
  * @package common\utils
  */
 class CronParseUtil
@@ -25,7 +26,7 @@ class CronParseUtil
     ];
 
     /**
-     * 检查 crontab 格式是否支持
+     * supported check by $contTime
      * @param string $cronTime
      * @param bool $checkCount
      * @return boolean true|false
@@ -52,15 +53,15 @@ class CronParseUtil
 
     /**
      * 格式化 crontab 格式字符串
-     * @param  string $cronTime
-     * @param int $maxSize 设置返回符合条件的时间数量, 默认为1
-     * @return array 返回符合格式的时间
-     * @throws Exception
+     * @param string $cronTime
+     * @param int $maxSize the number of time will returned
+     * @return array the list of next running datetime
+     * @throws CinCornException
      */
     public static function formatToDate($cronTime, $maxSize = 1)
     {
         if (!static::check($cronTime)) {
-            throw new Exception("格式错误: $cronTime", 1);
+            throw new CinCornException("formatError: $cronTime", 1);
         }
         self::$tags = preg_split('#\s+#', $cronTime);
 
@@ -88,7 +89,6 @@ class CronParseUtil
      */
     private static function getDateList(array $cronArr, $maxSize, $year = null)
     {
-
         $dates = [];
 
         // 年份基点
@@ -99,7 +99,7 @@ class CronParseUtil
 
         foreach ($cronArr['month'] as $month) {
             // 获取此月最大天数
-            $maxDay = cal_days_in_month(CAL_GREGORIAN, $month, $nowYear);
+            $maxDay = CronParseUtil::getDaysByYearMonth($nowYear, $month);
             foreach (range(1, $maxDay) as $day) {
                 foreach ($cronArr['hours'] as $hours) {
                     foreach ($cronArr['minutes'] as $minutes) {
@@ -149,12 +149,12 @@ class CronParseUtil
     }
 
     /**
-     * 解析元素
-     * @param  string $tag 元素标签
-     * @param  integer $min 最小值
-     * @param  integer $max 最大值
+     * parse tag
+     * @param string $tag
+     * @param integer $min
+     * @param integer $max
      * @return array
-     * @throws Exception
+     * @throws CinCornException
      */
     private static function parseTag($tag, $min, $max)
     {
@@ -181,7 +181,7 @@ class CronParseUtil
             list($number, $mod) = explode('/', $tag);
             list($left, $right) = explode('-', $number);
             if ($left > $right) {
-                throw new Exception("$tag 不支持");
+                throw new CinCornException("[{$tag}] is not supported");
             }
             foreach (range($left, $right) as $n) {
                 if ($n % $mod === 0) {
@@ -197,7 +197,7 @@ class CronParseUtil
         else if (false !== strpos($tag, '-')) {
             list($left, $right) = explode('-', $tag);
             if ($left > $right) {
-                throw new Exception("$tag 不支持");
+                throw new CinCornException("[{$tag}] is not supported");
             }
             $dateList = range($left, $right, $step);
         }
@@ -208,7 +208,7 @@ class CronParseUtil
         // 越界判断
         foreach ($dateList as $num) {
             if ($num < $min || $num > $max) {
-                throw new Exception('数值越界');
+                throw new CinCornException('index out of range');
             }
         }
 
@@ -226,5 +226,18 @@ class CronParseUtil
     private static function checkExp($tag)
     {
         return (false !== strpos($tag, ',')) || (false !== strpos($tag, '-')) || (false !== strpos($tag, '/'));
+    }
+
+    /**
+     * get number of days by YYYY-mm
+     * @param string $year example: 2020
+     * @param string $month example: 2,02
+     * @return string
+     */
+    private static function getDaysByYearMonth($year, $month) {
+        if (strlen($month) === 1) {
+            $month = "0" . $month;
+        }
+        return date("t", strtotime("{$year}-{$month}"));
     }
 }

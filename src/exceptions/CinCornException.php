@@ -7,7 +7,7 @@ namespace cin\cron\exceptions;
 use Exception;
 
 /**
- * Class CinException 任务管理异常
+ * Class CinException cin cron exception
  * @package cin\cron\exceptions
  */
 class CinCornException extends Exception {

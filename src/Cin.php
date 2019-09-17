@@ -10,35 +10,35 @@ use cin\cron\exceptions\CinCornException;
 defined('STDOUT') or define('STDOUT', fopen('php://stdout', 'w'));
 
 /**
- * Class Cin cin-cron 全局静态类、入口类
+ * Class Cin cin-cron global entry, static class
  * @package cin\cron
  */
 class Cin {
     /**
-     * 任务状态：正在运行
+     * task status: running
      */
     const TASK_STATUS_RUN = 1;
     /**
-     * 任务状态：等待运行
+     * task status: waiting to run
      */
     const TASK_STATUS_WAIT = 2;
 
     /**
-     * 任务激活状态：激活中
+     * task active：yes
      */
-    const TASK_ACTIVE_TRUE = 1;
+    const TASK_ACTIVE_YES = 1;
     /**
-     * 任务激活状态：禁用
+     * task active：no
      */
-    const TASK_ACTIVE_FALSE = 0;
+    const TASK_ACTIVE_NO = 0;
 
     /**
-     * @var null|TaskManager 任务管理器实例
+     * @var null|TaskManager single instance of task manager
      */
     private static $taskManager = null;
 
     /**
-     * 获取任务管理器
+     * get task manager single instance
      * @param ConfigVo|null $configVo
      * @return TaskManager
      * @throws CinCornException
@@ -48,9 +48,7 @@ class Cin {
             if ($configVo === null) {
                 $configVo = Cin::getDefaultConfigVo();
             }
-            if (!$configVo->validate()) {
-                throw new CinCornException("配置错误");
-            }
+            $configVo->validate();
             Cin::$taskManager = new TaskManager();
             Cin::$taskManager->initByConfig($configVo);
         }
@@ -58,7 +56,7 @@ class Cin {
     }
 
     /**
-     * 获取默认配置
+     * get default config
      * @return ConfigVo
      */
     private static function getDefaultConfigVo() {

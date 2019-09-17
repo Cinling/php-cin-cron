@@ -2,20 +2,19 @@
 namespace cin\cron\component;
 
 use cin\cron\Cin;
-use cin\cron\utils\ConsoleUtil;
 use cin\cron\utils\JsonUtil;
 use cin\cron\vo\ConfigVo;
 use cin\cron\vo\TaskVo;
 use Exception;
 
 /**
- * Class Manager
- * 任务管理器
+ * Class TaskManager
+ * task manager
  * @package cin\cron
  */
 class TaskManager {
     /**
-     * 保存路径
+     * save path
      * @var string
      */
     private $savePath = "";
@@ -25,6 +24,7 @@ class TaskManager {
     private $taskVoDict = [];
 
     /**
+     * use ConfigVo init the class
      * @param ConfigVo $configVo
      */
     public function initByConfig(ConfigVo $configVo) {
@@ -39,18 +39,19 @@ class TaskManager {
     }
 
     /**
-     * 初始化需要运行的任务
+     * init task list
+     * It is recommended to run by update project once
      * @throws Exception
      */
     public function init() {
-        // 暂停所有定时任务
+        // pause all tasks
         $oldTaskVoDict = $this->readTaskVoDict();
         foreach ($oldTaskVoDict as $taskVo) {
-            $taskVo->active = Cin::TASK_ACTIVE_FALSE;
+            $taskVo->active = Cin::TASK_ACTIVE_NO;
         }
         $this->saveTaskVoDict($oldTaskVoDict);
 
-        // 重新写入的任务数据
+        // rewrite task list
         foreach ($this->taskVoDict as $taskId => $taskVo) {
             if (isset($oldTaskVoDict[$taskId])) {
                 $tmpTaskVo = $oldTaskVoDict[$taskId];
@@ -61,7 +62,7 @@ class TaskManager {
                 if ($nextRunTime < $tmpTaskVo->nextRunTime) {
                     $tmpTaskVo->nextRunTime = $nextRunTime;
                 }
-                $tmpTaskVo->active = Cin::TASK_ACTIVE_TRUE;
+                $tmpTaskVo->active = Cin::TASK_ACTIVE_YES;
                 $oldTaskVoDict[$taskId] = $tmpTaskVo;
             } else {
                 $oldTaskVoDict[$taskId] = $taskVo;
@@ -71,7 +72,8 @@ class TaskManager {
     }
 
     /**
-     * 运行任务（一般是定时任务，每分钟运行一次）
+     * run task list
+     * It is recommended to run every minute with crontab.
      * @throws Exception
      */
     public function run() {
@@ -83,7 +85,7 @@ class TaskManager {
         }
         $this->saveTaskVoDict($runTaskVoDict, false);
 
-        $procTaskIdDict = []; // 进程池
+        $procTaskIdDict = []; // process pool
         foreach ($runTaskVoDict as $taskId => $taskVo) {
             $procTaskIdDict[$taskId] = proc_open($taskVo->command, [], $pipe);
         }
@@ -109,9 +111,11 @@ class TaskManager {
     }
 
     /**
-     * 保存当前的任务列表
+     * save current task list
      * @param TaskVo[] $taskVoDict
-     * @param bool $overwrite 是否覆盖。如果不覆盖则值替换其中部分数据
+     * @param bool $overwrite is overwrite.
+     *      true: overwrite by $taskVoDict.
+     *      false: merge by $taskVoDict.
      */
     private function saveTaskVoDict($taskVoDict, $overwrite = true) {
         if (!$overwrite) {
@@ -127,7 +131,7 @@ class TaskManager {
     }
 
     /**
-     * 从文件中读取任务列表数据
+     * read task list form local file
      * @return TaskVo[]
      */
     private function readTaskVoDict() {
@@ -145,7 +149,7 @@ class TaskManager {
     }
 
     /**
-     * 获取可以运行的任务字典
+     * get task list that are ready to run.
      * @return TaskVo[]
      */
     private function getRunTaskVoDict() {
@@ -155,7 +159,7 @@ class TaskManager {
         foreach ($taskVoDict as $taskVo) {
             if (
                 $taskVo->status === Cin::TASK_STATUS_RUN
-                || $taskVo->active === Cin::TASK_ACTIVE_FALSE
+                || $taskVo->active === Cin::TASK_ACTIVE_NO
                 || $taskVo->nextRunTime > $now
             ) {
                 continue;
@@ -166,7 +170,7 @@ class TaskManager {
     }
 
     /**
-     * 获取任务列表保存的文件路径
+     * get file path where the task list is save
      * @return string
      */
     private function getTaskListFilename() {

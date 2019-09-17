@@ -5,7 +5,8 @@ namespace cin\cron\utils;
 
 
 /**
- * Class ConsoleUtil 命令行工具
+ * Class ConsoleUtil command line utils
+ * @copyright https://github.com/yiisoft/yii2/blob/2.0.26/framework/helpers/Console.php
  * @package cin\cron\utils
  */
 class ConsoleUtil {
