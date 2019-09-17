@@ -1,0 +1,18 @@
+{
+    "name": "cinling/cin-cron",
+    "license": "Apache License 2.0",
+    "authors": [
+        {
+            "name": "cinling",
+            "email": "1105412681@qq.com"
+        }
+    ],
+    "version": "0.0.0",
+    "require": {
+        "php": ">=5.4"
+    },
+    "autoload": {
+        "CinCron\\": "src/",
+        "psr-4": {"CinCron\\": "src/"}
+    }
+}
