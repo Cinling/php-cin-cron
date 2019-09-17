@@ -12,7 +12,6 @@
         "php": ">=5.4"
     },
     "autoload": {
-        "CinCron\\": "src/",
         "psr-4": {"CinCron\\": "src/"}
     }
 }
