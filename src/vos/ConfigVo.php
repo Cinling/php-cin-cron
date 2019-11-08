@@ -4,7 +4,6 @@ namespace cin\cron\vo;
 
 use cin\cron\Cin;
 use cin\cron\exceptions\CinCornException;
-use Closure;
 
 /**
  * Class ConfigVo

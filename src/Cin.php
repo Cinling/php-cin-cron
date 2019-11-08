@@ -50,7 +50,7 @@ class Cin {
             }
             $configVo->validate();
             Cin::$taskManager = new TaskManager();
-            Cin::$taskManager->initByConfig($configVo);
+            Cin::$taskManager->initByConfigVo($configVo);
         }
         return Cin::$taskManager;
     }

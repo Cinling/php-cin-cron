@@ -27,7 +27,7 @@ class TaskManager {
      * use ConfigVo init the class
      * @param ConfigVo $configVo
      */
-    public function initByConfig(ConfigVo $configVo) {
+    public function initByConfigVo(ConfigVo $configVo) {
         $this->savePath = $configVo->savePath;
         foreach ($configVo->taskVoList as $taskVo) {
             $this->taskVoDict[$taskVo->id] = $taskVo;
