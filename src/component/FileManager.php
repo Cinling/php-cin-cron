@@ -12,7 +12,7 @@ use Exception;
  * task manager
  * @package cin\cron
  */
-class TaskManager {
+class FileManager extends BaseManager {
     /**
      * save path
      * @var string
@@ -175,5 +175,13 @@ class TaskManager {
      */
     private function getTaskListFilename() {
         return  $this->savePath . "/task-list.json";
+    }
+
+    /**
+     * get list of all tasks
+     * @return TaskVo[]
+     */
+    public function getTaskVoList() {
+        return array_values($this->readTaskVoDict());
     }
 }

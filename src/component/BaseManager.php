@@ -1,14 +1,14 @@
 <?php
 
 
-namespace cin\cron\component\TaskManager;
+namespace cin\cron\component;
 
 
 use cin\cron\Cin;
 use cin\cron\vo\ConfigVo;
 use cin\cron\vo\TaskVo;
 
-abstract class BaseTaskManager {
+abstract class BaseManager {
     /**
      * @var TaskVo[]
      */

@@ -3,7 +3,7 @@
 
 namespace cin\cron;
 
-use cin\cron\component\TaskManager;
+use cin\cron\component\FileManager;
 use cin\cron\vo\ConfigVo;
 use cin\cron\exceptions\CinCornException;
 
@@ -33,14 +33,14 @@ class Cin {
     const TASK_ACTIVE_NO = 0;
 
     /**
-     * @var null|TaskManager single instance of task manager
+     * @var null|FileManager single instance of task manager
      */
     private static $taskManager = null;
 
     /**
      * get task manager single instance
      * @param ConfigVo|null $configVo
-     * @return TaskManager
+     * @return FileManager
      * @throws CinCornException
      */
     public static function getTaskManager($configVo = null) {
@@ -49,7 +49,7 @@ class Cin {
                 $configVo = Cin::getDefaultConfigVo();
             }
             $configVo->validate();
-            Cin::$taskManager = new TaskManager();
+            Cin::$taskManager = new FileManager();
             Cin::$taskManager->initByConfigVo($configVo);
         }
         return Cin::$taskManager;
