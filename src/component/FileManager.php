@@ -99,9 +99,32 @@ class FileManager extends BaseManager {
     }
 
     /**
+     * @param bool $withTimestamp
      * @return string
      */
-    private function getTaskRecordFilename() {
-        return $this->getSavePath() . "/task-record.json";
+    private function getTaskRecordFilename($withTimestamp = false) {
+        $savePath = $this->getSavePath();
+        if ($withTimestamp) {
+            $filename = $savePath . "/task-record.{$withTimestamp}.json";
+        } else {
+            $filename = $savePath . "/task-record.json";
+        }
+        return $filename;
+    }
+
+    /**
+     * read record file's content
+     * @return string
+     */
+    private function getRecordFileContent() {
+        $filename = $this->getTaskRecordFilename();
+        if (!file_exists($filename)) {
+            return "";
+        } else if (filesize($filename) > $this->fileConfigVo->recordFileMaxSize) {
+            $newFilename = $this->getTaskRecordFilename(true);
+            rename($filename, $newFilename);
+            return "";
+        }
+        // TODO 读取文件内容
     }
 }

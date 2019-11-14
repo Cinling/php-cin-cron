@@ -18,11 +18,11 @@ abstract class BaseManager {
      * task list
      * @var ConfigVo
      */
-    protected $configVo = null;
+    private $configVo = null;
     /**
      * @var string
      */
-    protected $runtimeDir = "";
+    private $runtimeDir = "";
 
 
     /**

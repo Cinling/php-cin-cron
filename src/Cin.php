@@ -34,6 +34,15 @@ class Cin {
     const TASK_ACTIVE_NO = 0;
 
     /**
+     * file size unit: KB
+     */
+    const KB = 1024;
+    /**
+     * file size unit: MB
+     */
+    const MB = 1048576;
+
+    /**
      * @var ConfigVo
      */
     private static $configVo = null;
