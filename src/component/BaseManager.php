@@ -5,59 +5,106 @@ namespace cin\cron\component;
 
 
 use cin\cron\Cin;
+use cin\cron\exceptions\CinCornException;
 use cin\cron\vo\ConfigVo;
 use cin\cron\vo\TaskVo;
 
+/**
+ * Class BaseManager task manager abstract class
+ * @package cin\cron\component
+ */
 abstract class BaseManager {
     /**
+     * task list
      * @var TaskVo[]
      */
-    protected $taskVoList;
+    protected $taskVoList = [];
 
     /**
-     * @param ConfigVo $configVo
-     * @return void
+     * save task list to local, file system or database, this depends on the implementation class
+     * @param ConfigVo $configVo the task config
+     * @throws CinCornException
      */
-    public function initByConfigVo(ConfigVo $configVo) {
-        $this->taskVoList;
+    public function init(ConfigVo $configVo) {
+        $this->saveTaskVoList($configVo->taskVoList, false);
     }
 
     /**
-     * get list of all tasks
-     * @return TaskVo[]
+     * run the task list
+     * @throws CinCornException
      */
-    abstract public function getTaskVoList();
-
-    /**
-     * get list of all ready to run task
-     * @return TaskVo[]
-     */
-    public function getReadyTaskVoList() {
+    public function run() {
         $taskVoList = $this->getTaskVoList();
-        $now = time();
-        $readyTaskVoList = [];
         foreach ($taskVoList as $taskVo) {
-            if ($taskVo->active === Cin::TASK_ACTIVE_NO || $taskVo->status === Cin::TASK_STATUS_RUN || $taskVo->nextRunTime > $now) {
-                continue;
-            }
-            $readyTaskVoList[] = $taskVo;
+            $taskVo->status = Cin::TASK_STATUS_RUN;
         }
-        return $readyTaskVoList;
+        $this->saveTaskVoList($taskVoList, false);
+
+        $procTaskIdDict = []; // process pool
+        foreach ($taskVoList as $taskId => $taskVo) {
+            $procTaskIdDict[$taskId] = proc_open($taskVo->command, [], $pipe);
+        }
+        $now = time();
+
+        while (count($procTaskIdDict)) {
+            foreach ($procTaskIdDict as $taskId => $result) {
+                $status = proc_get_status($result);
+                if ($status['running'] == FALSE) {
+                    $exitCode = $status["exitcode"];
+                    proc_close($result);
+                    unset($procTaskIdDict[$taskId]);
+
+                    $taskVo = $taskVoList[$taskId];
+                    $taskVo->status = Cin::TASK_STATUS_WAIT;
+                    $taskVo->lastRunAt = $now;
+                    $taskVo->nextRunAt = $taskVo->getNextRunAt();
+                    $taskVo->changeAt = time();
+                    $this->saveTaskVoList([$taskVo], false);
+                    $this->recordTaskRuntimeLog($taskVo, $exitCode);
+                }
+            }
+
+            usleep(100);
+        }
     }
 
     /**
-     * save list of all tasks
+     * get task list.
+     * @param bool $reload reload or not
+     *      true:   reload form source
+     *      false:  load form object's property
+     * @return TaskVo[]
+     */
+    protected function getTaskVoList($reload = false) {
+        if (empty($this->taskVoList) || $reload) {
+            $this->taskVoList = $this->readTaskVoList();
+        }
+        return $this->taskVoList;
+    }
+
+    /**
+     * read task list
+     * @return mixed
+     */
+    protected abstract function readTaskVoList();
+
+    /**
+     * save task list.
      * @param TaskVo[] $taskVoList
+     * @param $overwrite bool is overwrite all task.
+     *      true:   delete all task, and write by $taskVoList.
+     *      false:  read all task, and change task by name. new if the task doesn't exists.
+     * @return bool save done.
+     * @throws CinCornException
      */
-    public function saveTaskVoList(array $taskVoList) {
-    }
+    protected abstract function saveTaskVoList(array $taskVoList, $overwrite = true);
 
     /**
-     * add a task's running record.
-     * @param TaskVo $taskVo task instance
-     * @param int $status running status
-     * @param int $runningMS How many milliseconds does it take to run
+     * record task runtime log
+     * @param TaskVo $taskVo task
+     * @param $exitCode int process exit code.
+     * @return bool
+     * @throws CinCornException
      */
-    protected function addRunRecord(TaskVo $taskVo, $status, $runningMS) {
-    }
+    protected abstract function recordTaskRuntimeLog(TaskVo $taskVo, $exitCode);
 }

@@ -38,6 +38,7 @@ class Cin {
     private static $taskManager = null;
 
     /**
+     * @deprecated
      * get task manager single instance
      * @param ConfigVo|null $configVo
      * @return FileManager
@@ -56,11 +57,19 @@ class Cin {
     }
 
     /**
+     * @deprecated
      * get default config
      * @return ConfigVo
      */
     private static function getDefaultConfigVo() {
         $config = new ConfigVo();
         return $config;
+    }
+
+    /**
+     * @param $savePath string Files save path
+     */
+    public static function getFileManager($savePath) {
+
     }
 }

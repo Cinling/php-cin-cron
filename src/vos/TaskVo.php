@@ -2,6 +2,7 @@
 namespace cin\cron\vo;
 
 
+use cin\cron\exceptions\CinCornException;
 use cin\cron\utils\CronParseUtil;
 use Exception;
 
@@ -34,11 +35,11 @@ class TaskVo extends BaseVo {
     /**
      * @var int 上次运行时间（时间戳）
      */
-    public $lastRunTime;
+    public $lastRunAt;
     /**
      * @var int 下一次运行时间（时间戳）
      */
-    public $nextRunTime;
+    public $nextRunAt;
     /**
      * @var bool 是否激活
      */
@@ -46,27 +47,27 @@ class TaskVo extends BaseVo {
     /**
      * @var int 修改任务时间（时间戳）
      */
-    public $changeTime;
+    public $changeAt;
     /**
      * @var int 任务创建时间（时间戳）
      */
-    public $createTime;
+    public $createAt;
 
     /**
      * 初始化数据
      */
     public function init() {
         parent::init();
-        $this->lastRunTime = 0;
-        $this->createTime = time();
+        $this->lastRunAt = 0;
+        $this->createAt = time();
     }
 
     /**
      * 获取下一次运行时间
-     * @return string 时间
-     * @throws Exception
+     * @return int 时间
+     * @throws CinCornException
      */
-    public function getNextRunTime()
+    public function getNextRunAt()
     {
         $array = CronParseUtil::formatToDate($this->cronTime);
         return strtotime($array[0]);

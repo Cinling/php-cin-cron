@@ -3,7 +3,6 @@ namespace cin\cron\vo;
 
 
 use cin\cron\Cin;
-use cin\cron\exceptions\CinCornException;
 
 /**
  * Class ConfigVo
@@ -20,16 +19,6 @@ class ConfigVo {
      * @see ConfigVo::addTask()
      */
     public $taskVoList = [];
-
-    /**
-     * validate config values
-     * @throws CinCornException
-     */
-    public function validate() {
-        if (empty($this->savePath)) {
-            throw new CinCornException("no save path");
-        }
-    }
 
     /**
      * add one task

@@ -9,7 +9,7 @@
     ],
     "version": "0.1.0",
     "require": {
-        "php": ">=7.0"
+        "php": ">=5.6"
     },
     "autoload": {
         "psr-4": {"cin\\cron\\": "src/"},

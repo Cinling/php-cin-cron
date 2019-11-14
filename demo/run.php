@@ -34,8 +34,8 @@ function getConfig() {
  * @throws Exception
  */
 function init() {
-    $taskManager = Cin::getTaskManager(getConfig());
-    $taskManager->init();
+    $taskManager = Cin::getTaskManager();
+    $taskManager->init(getConfig());
 
     ConsoleUtil::output("init finished");
 }
