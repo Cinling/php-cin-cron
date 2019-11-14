@@ -6,7 +6,9 @@ namespace cin\cron\component;
 
 use cin\cron\exceptions\CinCornException;
 use cin\cron\utils\JsonUtil;
+use cin\cron\vo\ConfigVo;
 use cin\cron\vo\TaskVo;
+use cin\cron\vos\FileConfigVo;
 
 /**
  * Class FileManager
@@ -15,23 +17,29 @@ use cin\cron\vo\TaskVo;
  */
 class FileManager extends BaseManager {
     /**
-     * @var string
+     * @var FileConfigVo
      */
-    private $savePath = "";
+    private $fileConfigVo;
 
     /**
-     * FileManager constructor.
-     * @param $savePath string File save path.
-     * @throws CinCornException
+     * load config
+     * @param ConfigVo $configVo
      */
-    public function __construct($savePath) {
-        if (empty($savePath)) {
-            throw new CinCornException('$savePath was empty');
+    public function load(ConfigVo $configVo) {
+        parent::load($configVo);
+        $this->fileConfigVo = $configVo->file;
+    }
+
+    /**
+     * get file save path
+     * @return string
+     */
+    public function getSavePath() {
+        $savePath = $this->getRuntimeDir() . "/file-manager";
+        if (!file_exists($savePath)) {
+            mkdir($savePath, 0755, true);
         }
-        $this->savePath = $savePath;
-        if (!file_exists($this->savePath)) {
-            mkdir($this->savePath, 0755, true);
-        }
+        return $savePath;
     }
 
     /**
@@ -79,13 +87,21 @@ class FileManager extends BaseManager {
      * @throws CinCornException
      */
     protected function recordTaskRuntimeLog(TaskVo $taskVo, $exitCode) {
-        // TODO: Implement recordTaskRuntimeLog() method.
+        // TODO
+        return true;
     }
 
     /**
      * @return string
      */
     private function getTaskListFilename() {
-        return $this->savePath . "/task-list.json";
+        return $this->getSavePath() . "/task-list.json";
+    }
+
+    /**
+     * @return string
+     */
+    private function getTaskRecordFilename() {
+        return $this->getSavePath() . "/task-record.json";
     }
 }

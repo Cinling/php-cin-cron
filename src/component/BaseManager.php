@@ -16,17 +16,55 @@ use cin\cron\vo\TaskVo;
 abstract class BaseManager {
     /**
      * task list
-     * @var TaskVo[]
+     * @var ConfigVo
      */
-    protected $taskVoList = [];
+    protected $configVo = null;
+    /**
+     * @var string
+     */
+    protected $runtimeDir = "";
+
+
+    /**
+     * read task list
+     * @return mixed
+     */
+    protected abstract function readTaskVoList();
+
+    /**
+     * save task list.
+     * @param TaskVo[] $taskVoList
+     * @param $overwrite bool is overwrite all task.
+     *      true:   delete all task, and write by $taskVoList.
+     *      false:  read all task, and change task by name. new if the task doesn't exists.
+     * @return bool save done.
+     * @throws CinCornException
+     */
+    protected abstract function saveTaskVoList(array $taskVoList, $overwrite = true);
+
+    /**
+     * record task runtime log
+     * @param TaskVo $taskVo task
+     * @param $exitCode int process exit code.
+     * @return bool
+     * @throws CinCornException
+     */
+    protected abstract function recordTaskRuntimeLog(TaskVo $taskVo, $exitCode);
+
+
+    /**
+     * @param ConfigVo $configVo
+     */
+    public function load(ConfigVo $configVo) {
+        $this->configVo = $configVo;
+    }
 
     /**
      * save task list to local, file system or database, this depends on the implementation class
-     * @param ConfigVo $configVo the task config
      * @throws CinCornException
      */
-    public function init(ConfigVo $configVo) {
-        $this->saveTaskVoList($configVo->taskVoList, false);
+    public function init() {
+        $this->saveTaskVoList($this->configVo->taskVoList, false);
     }
 
     /**
@@ -41,8 +79,17 @@ abstract class BaseManager {
         $this->saveTaskVoList($taskVoList, false);
 
         $procTaskIdDict = []; // process pool
+        $pipesDict = []; // pipes map
         foreach ($taskVoList as $taskId => $taskVo) {
-            $procTaskIdDict[$taskId] = proc_open($taskVo->command, [], $pipe);
+            $pipes = [["pipe" => "w"]];
+            $process = proc_open($taskVo->command, [],  $pipesDict[$taskId]);
+            if (!is_resource($process)) {
+                $this->recordTaskRuntimeLog($taskVo, "-1");
+                continue;
+            }
+
+            $procTaskIdDict[$taskId] = $process;
+            $pipesDict[$taskId] = $pipes;
         }
         $now = time();
 
@@ -50,6 +97,7 @@ abstract class BaseManager {
             foreach ($procTaskIdDict as $taskId => $result) {
                 $status = proc_get_status($result);
                 if ($status['running'] == FALSE) {
+
                     $exitCode = $status["exitcode"];
                     proc_close($result);
                     unset($procTaskIdDict[$taskId]);
@@ -83,28 +131,9 @@ abstract class BaseManager {
     }
 
     /**
-     * read task list
-     * @return mixed
+     * get runtime dir
      */
-    protected abstract function readTaskVoList();
-
-    /**
-     * save task list.
-     * @param TaskVo[] $taskVoList
-     * @param $overwrite bool is overwrite all task.
-     *      true:   delete all task, and write by $taskVoList.
-     *      false:  read all task, and change task by name. new if the task doesn't exists.
-     * @return bool save done.
-     * @throws CinCornException
-     */
-    protected abstract function saveTaskVoList(array $taskVoList, $overwrite = true);
-
-    /**
-     * record task runtime log
-     * @param TaskVo $taskVo task
-     * @param $exitCode int process exit code.
-     * @return bool
-     * @throws CinCornException
-     */
-    protected abstract function recordTaskRuntimeLog(TaskVo $taskVo, $exitCode);
+    protected function getRuntimeDir() {
+        return $this->configVo->runtimeDir;
+    }
 }

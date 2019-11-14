@@ -3,6 +3,7 @@ namespace cin\cron\vo;
 
 
 use cin\cron\Cin;
+use cin\cron\vos\FileConfigVo;
 
 /**
  * Class ConfigVo
@@ -10,15 +11,19 @@ use cin\cron\Cin;
  */
 class ConfigVo {
     /**
-     * @var string log path
-     */
-    public $savePath = "./cin-cron-runtime";
-    /**
      * @var TaskVo[] task list
      * it's suggested to add tasks using [addTask()]
      * @see ConfigVo::addTask()
      */
     public $taskVoList = [];
+    /**
+     * @var string  runtime dir. Some files will be written here
+     */
+    public $runtimeDir = "";
+    /**
+     * @var null|FileConfigVo
+     */
+    public $file = null;
 
     /**
      * add one task

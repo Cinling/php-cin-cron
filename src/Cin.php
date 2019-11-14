@@ -3,6 +3,7 @@
 
 namespace cin\cron;
 
+use cin\cron\component\BaseManager;
 use cin\cron\component\FileManager;
 use cin\cron\vo\ConfigVo;
 use cin\cron\exceptions\CinCornException;
@@ -33,43 +34,79 @@ class Cin {
     const TASK_ACTIVE_NO = 0;
 
     /**
-     * @var null|FileManager single instance of task manager
+     * @var ConfigVo
      */
-    private static $taskManager = null;
+    private static $configVo = null;
 
     /**
-     * @deprecated
-     * get task manager single instance
-     * @param ConfigVo|null $configVo
-     * @return FileManager
+     * @var null|BaseManager single instance of task manager
+     */
+    private static $manager = null;
+
+    /**
+     * load config
+     * @param ConfigVo $configVo
      * @throws CinCornException
      */
-    public static function getTaskManager($configVo = null) {
-        if (Cin::$taskManager === null) {
-            if ($configVo === null) {
-                $configVo = Cin::getDefaultConfigVo();
-            }
-            $configVo->validate();
-            Cin::$taskManager = new FileManager();
-            Cin::$taskManager->initByConfigVo($configVo);
+    public static function load(ConfigVo $configVo) {
+        Cin::$configVo = $configVo;
+        Cin::$manager = Cin::getManager();
+    }
+
+    /**
+     * store task list
+     * It is recommended to run once when the project is updated
+     * @throws CinCornException
+     */
+    public static function init() {
+        Cin::checkConfigVo();
+        Cin::$manager->init();
+    }
+
+    /**
+     * run task list by cron time
+     * It is recommended that the system run once a minute
+     * @throws CinCornException
+     */
+    public static function run() {
+        Cin::checkConfigVo();
+        Cin::$manager->run();
+    }
+
+    /**
+     * Check CIn::$configVo
+     * @throws CinCornException
+     */
+    private static function checkConfigVo() {
+        if (false) {
+            throw new CinCornException("not Implemented.");
         }
-        return Cin::$taskManager;
     }
 
     /**
-     * @deprecated
-     * get default config
-     * @return ConfigVo
+     * init task manager
+     * @throws CinCornException
      */
-    private static function getDefaultConfigVo() {
-        $config = new ConfigVo();
-        return $config;
+    private static function getManager() {
+        Cin::checkConfigVo();
+        $manager = null;
+        if (Cin::$configVo->file !== null) {
+            $manager = Cin::getFileManager();
+        } else {
+            throw new CinCornException("no manager config");
+        }
+        $manager->load(Cin::$configVo);
+        return $manager;
     }
 
-    /**
-     * @param $savePath string Files save path
-     */
-    public static function getFileManager($savePath) {
 
+    /**
+     * @return FileManager|BaseManager
+     */
+    private static function getFileManager() {
+        if (Cin::$manager === null || !(Cin::$manager instanceof FileManager)) {
+            Cin::$manager = new FileManager();
+        }
+        return Cin::$manager;
     }
 }
